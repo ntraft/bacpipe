@@ -139,14 +139,44 @@ class ModelBaseClass:
 
 
 def check_if_cudnn_tensorflow_compatible():
-    import torch
-    version = (torch.backends.cudnn.version() % 1000) // 100
-    if version < 3:
-        logger.info(
-            "cuDNN version does not match the required 9.3 for tensorflow. "
-            "Device is therefore set to cpu for the tensorflow models."
+    major, minor, patch = parse_cudnn_version()
+    version = major + minor / 10
+    if version < 9.3:
+        logger.warning(
+            "cuDNN version does not match the required 9.3 for Tensorflow 2.18+. "
+            "Device is therefore set to cpu for the Tensorflow models."
             )
         return False
     else:
         return True
-    
+
+
+def parse_cudnn_version():
+    """
+    Parse the cuDNN version found by PyTorch.
+    Examples:
+      - 8902 = 8.9.2
+      - 9102 = 9.1.2
+      - 91002 = 9.10.2
+
+    Returns
+    -------
+    tuple(int)
+        integers representing (major, minor, patch)
+    """
+    v = torch.backends.cudnn.version()
+    s = str(v)
+
+    # Patch is always the last 2 digits
+    patch = int(s[-2:])
+    rem = s[:-2]
+
+    # Parsing of the remainder depends on how many digits are left.
+    if len(rem) == 2:
+        major, minor = int(rem[0]), int(rem[1])
+    elif len(rem) == 3:
+        major, minor = int(rem[0]), int(rem[1:])
+    else:  # len(rem) == 4
+        major, minor = int(rem[:2]), int(rem[2:])
+
+    return major, minor, patch
