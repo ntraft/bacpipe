@@ -13,7 +13,8 @@ import tensorflow
 
 logger = logging.getLogger("bacpipe")
 
-class ModelBaseClass:    
+
+class ModelBaseClass:
     def __init__(self, sr, segment_length, device, 
                  model_base_path, global_batch_size, 
                  model_name, padding, 
@@ -92,7 +93,7 @@ class ModelBaseClass:
             if "CUDA_VISIBLE_DEVICES" in os.environ:
                 os.environ.pop("CUDA_VISIBLE_DEVICES")
                 
-        logger.info(f"Using {device=}")
+        logger.info(f"Using {self.device=}")
                 
         self.model_base_path = Path(model_base_path)
         with pkg_resources.path(bacpipe, "model_specific_utils") as utils_path:
@@ -191,9 +192,7 @@ class ModelBaseClass:
 
     def init_dataloader(self, audio):
         if "tensorflow" in str(type(audio)):
-            import tensorflow as tf
-
-            return tf.data.Dataset.from_tensor_slices(audio).batch(self.batch_size)
+            return tensorflow.data.Dataset.from_tensor_slices(audio).batch(self.batch_size)
         elif "torch" in str(type(audio)):
 
             return torch.utils.data.DataLoader(
@@ -243,20 +242,49 @@ class ModelBaseClass:
         if isinstance(embeds[0], torch.Tensor):
             return torch.cat(embeds, axis=0)
         else:
-            import tensorflow as tf
-            return_embeds = tf.concat(embeds, axis=0).numpy().squeeze()
+            return_embeds = tensorflow.concat(embeds, axis=0).numpy().squeeze()
             return return_embeds
 
 
 def check_if_cudnn_tensorflow_compatible():
-    import torch
-    version = (torch.backends.cudnn.version() % 1000) // 100
-    if version < 3:
-        logger.info(
-            "cuDNN version does not match the required 9.3 for tensorflow. "
-            "Device is therefore set to cpu for the tensorflow models."
+    major, minor, patch = parse_cudnn_version()
+    version = major + minor / 10
+    if version < 9.3:
+        logger.warning(
+            "cuDNN version does not match the required 9.3 for Tensorflow 2.18+. "
+            "Device is therefore set to cpu for the Tensorflow models."
             )
         return False
     else:
         return True
-    
+
+
+def parse_cudnn_version():
+    """
+    Parse the cuDNN version found by PyTorch.
+    Examples:
+      - 8902 = 8.9.2
+      - 9102 = 9.1.2
+      - 91002 = 9.10.2
+
+    Returns
+    -------
+    tuple(int)
+        integers representing (major, minor, patch)
+    """
+    v = torch.backends.cudnn.version()
+    s = str(v)
+
+    # Patch is always the last 2 digits
+    patch = int(s[-2:])
+    rem = s[:-2]
+
+    # Parsing of the remainder depends on how many digits are left.
+    if len(rem) == 2:
+        major, minor = int(rem[0]), int(rem[1])
+    elif len(rem) == 3:
+        major, minor = int(rem[0]), int(rem[1:])
+    else:  # len(rem) == 4
+        major, minor = int(rem[:2]), int(rem[2:])
+
+    return major, minor, patch
