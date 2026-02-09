@@ -273,6 +273,8 @@ def parse_cudnn_version():
         integers representing (major, minor, patch)
     """
     v = torch.backends.cudnn.version()
+    if v is None:  # If we are not using CUDA...
+        return 1000, 0, 0
     s = str(v)
 
     # Patch is always the last 2 digits
