@@ -84,3 +84,4 @@ exclude = [
 
 [tool.black]
 line-length = 79
+
