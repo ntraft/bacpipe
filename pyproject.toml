@@ -20,6 +20,7 @@ dependencies = [
     "librosa",
     "ml-collections",
     "numba",
+    "onnxruntime-gpu",
     "panel",
     "plotly",
     "pysocks",
@@ -84,4 +85,13 @@ exclude = [
 
 [tool.black]
 line-length = 79
+
+# NOTE: The two sections below are needed to specify a version of ONNX which is compatible with current versions of
+#       Torch/Tensorflow, which use CUDA 12 (not CUDA 13).
+[tool.uv.sources]
+onnxruntime-gpu = { index = "ort-cuda-12" }
+
+[[tool.uv.indexes]]
+name = "ort-cuda-12"
+url = "https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/"
 
