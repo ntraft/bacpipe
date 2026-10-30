@@ -157,7 +157,6 @@ class birdnet_v3_ONNX(nn.Module):
 
         providers.append("CPUExecutionProvider")
         return providers
-    
 
     def forward(
         self,# session: "ort.InferenceSession",
