@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger("bacpipe")
 
-from ..model_utils import ModelBaseClass
+from ..model_utils import ModelBaseClass, onnx_session_options
 
 SAMPLE_RATE = 32000
 LENGTH_IN_SAMPLES = 96000
@@ -119,7 +119,11 @@ class birdnet_v3_ONNX(nn.Module):
         
         try:
             providers = self._get_execution_providers(device)
-            self.session = ort.InferenceSession(checkpoint_path, providers=providers)
+            self.session = ort.InferenceSession(
+                checkpoint_path,
+                sess_options=onnx_session_options(),
+                providers=providers,
+            )
             # Report actual provider used
             actual_provider = self.session.get_providers()[0] if self.session.get_providers() else "unknown"
             print(f"ONNX provider: {actual_provider}")

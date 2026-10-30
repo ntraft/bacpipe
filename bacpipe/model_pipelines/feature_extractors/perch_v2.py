@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger("bacpipe")
 
-from ..model_utils import ModelBaseClass
+from ..model_utils import ModelBaseClass, onnx_session_options
 
 SAMPLE_RATE = 32000
 LENGTH_IN_SAMPLES = 160000
@@ -127,7 +127,7 @@ class PerchV2ONNX(nn.Module):
         # 3. Configure execution providers
         providers = self._get_execution_providers(device)
 
-        session_options = ort.SessionOptions()
+        session_options = onnx_session_options()
         session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         
         self.session = ort.InferenceSession(

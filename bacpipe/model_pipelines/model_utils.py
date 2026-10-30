@@ -197,6 +197,29 @@ class ModelBaseClass:
         return input
 
 
+def onnx_session_options():
+    """
+    Create ONNX Runtime session options with an explicit intra-op thread
+    count, matching the CPUs this process is allowed to use. Otherwise
+    ONNX Runtime starts one thread per physical core of the machine and
+    tries to pin each one, which fails (and logs a pthread_setaffinity_np
+    error per thread) for cores outside the allocation, e.g. in a Slurm job.
+
+    Returns
+    -------
+    onnxruntime.SessionOptions
+        session options with intra_op_num_threads set
+    """
+    import onnxruntime as ort
+
+    session_options = ort.SessionOptions()
+    if hasattr(os, "sched_getaffinity"):  # Linux only
+        session_options.intra_op_num_threads = len(os.sched_getaffinity(0))
+    else:
+        session_options.intra_op_num_threads = os.cpu_count()
+    return session_options
+
+
 def check_if_cudnn_tensorflow_compatible():
     """
     Check if the installed cuDNN version is compatible with Tensorflow >=2,18.
