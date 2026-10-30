@@ -134,23 +134,26 @@ class birdnet_v3_ONNX(nn.Module):
         Parameters
         ----------
         device : str
-            requested device ("auto", "cpu", or "cuda")
+            requested device ("auto", "cpu", "gpu", or "cuda")
 
         Returns
         -------
         list of str
             execution providers to use for the ONNX session
         """
+        available = ort.get_available_providers()
         providers = []
 
-        # Select execution provider based on device
-        if device == "cuda":
-            providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
-        else:
-            providers = ["CPUExecutionProvider"]
+        if device.lower() in ("gpu", "cuda", "auto"):
+            if sys.platform == "darwin" and "CoreMLExecutionProvider" in available:
+                providers.append("CoreMLExecutionProvider")
+            elif "CUDAExecutionProvider" in available:
+                providers.append("CUDAExecutionProvider")
+            elif "DmlExecutionProvider" in available:
+                providers.append("DmlExecutionProvider")
 
         providers.append("CPUExecutionProvider")
-    
+        return providers
 
     def forward(
         self,# session: "ort.InferenceSession",
