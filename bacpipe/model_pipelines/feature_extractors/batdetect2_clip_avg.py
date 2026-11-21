@@ -92,6 +92,7 @@ class Model(ModelBaseClass):
         torch.Tensor
             clip-averaged features
         """
+        x = x.to(self.device)
         self.output = self.model(x)
 
         features = self.output.features.mean(dim=(-2, -1))

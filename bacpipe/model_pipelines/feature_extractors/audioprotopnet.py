@@ -96,6 +96,7 @@ class Model(ModelBaseClass):
         torch.Tensor
             pooler output embeddings
         """
+        x = x.to(self.device)
         self.results = self.model(x)
         return self.results.pooler_output
 

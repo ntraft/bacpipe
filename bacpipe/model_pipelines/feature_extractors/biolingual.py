@@ -72,4 +72,5 @@ class Model(ModelBaseClass):
         torch.Tensor
             audio features
         """
+        input = input.to(self.device)
         return self.model.get_audio_features(input)

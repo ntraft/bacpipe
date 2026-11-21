@@ -232,4 +232,5 @@ class Model(ModelBaseClass):
         torch.Tensor
             model output
         """
+        input = input.to(self.device)
         return self.model(input)

@@ -232,6 +232,7 @@ class Model(ModelBaseClass):
         torch.Tensor
             model features
         """
+        input = input.to(self.device)
         self.logits, features = self.model.net(input.unsqueeze(1))
         return features
 

@@ -88,5 +88,6 @@ class Model(ModelBaseClass):
         torch.Tensor
             model output
         """
+        input = input.to(self.device)
         res = self.model(input.unsqueeze(1))
         return res

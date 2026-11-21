@@ -120,6 +120,7 @@ class Model(ModelBaseClass):
             detection-averaged features, or a tuple of
             (features, class scores) when return_class_results is True
         """
+        x = x.to(self.device)
         x = x.unsqueeze(1)
         output = self.model(x)
 

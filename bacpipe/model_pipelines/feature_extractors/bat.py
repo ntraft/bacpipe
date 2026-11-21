@@ -127,6 +127,7 @@ class Model(ModelBaseClass):
         torch.Tensor or tuple
             class token, or a tuple of (class token, class predictions)
         """
+        x = x.to(self.device)
         with torch.no_grad():
             cls_token = self.model(x, return_token=True)
             if not return_class_results:

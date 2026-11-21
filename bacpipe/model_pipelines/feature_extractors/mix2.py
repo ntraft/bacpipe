@@ -64,4 +64,5 @@ class Model(ModelBaseClass):
         torch.Tensor
             model output
         """
+        x = x.to(self.device)
         return self.model(x)

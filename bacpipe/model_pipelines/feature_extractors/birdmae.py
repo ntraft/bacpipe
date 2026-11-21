@@ -68,4 +68,5 @@ class Model(ModelBaseClass):
         torch.Tensor
             last hidden state
         """
+        input = input.to(self.device)
         return self.model(input).last_hidden_state

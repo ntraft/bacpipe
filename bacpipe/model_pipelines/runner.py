@@ -182,10 +182,8 @@ class Embedder(AudioHandler):
     def batch_inference(self, batched_samples, callback=None):
         """
         Run the model on all batches and collect the embeddings.
-        Move every batch to the model device (cpu, cuda or mps).
-        Only ``cuda`` was special-cased before, so on a Mac the
-        input stayed on the cpu while the weights lived on ``mps``,
-        which raised "input and weight are not on the same device".
+        The batches are passed on as they are: every model moves its
+        input to the device it computes on (see ``ModelBaseClass.__call__``).
 
         Parameters
         ----------
@@ -215,9 +213,6 @@ class Embedder(AudioHandler):
             )
         ):
             with torch.no_grad():
-                if self.model.device != "cpu":
-                    if hasattr(batch, "to"):
-                        batch = batch.to(self.model.device)
                 embeddings = self.model(batch)
                 if self.model.bool_classifier:
                     try:
@@ -443,7 +438,6 @@ class Embedder(AudioHandler):
                         audio_idx_range : audio_idx_range
                         + self.model.batch_size
                     ].squeeze()
-                    audio = audio.to(self.model.device)
                     if len(audio.shape) == 1:
                         audio = audio.unsqueeze(0)
                     preprocessed = self.model.preprocess(audio)

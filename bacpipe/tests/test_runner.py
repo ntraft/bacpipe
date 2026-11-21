@@ -222,9 +222,7 @@ class TestGenerateEmbeddingsFromAudioArray:
     1. The producer looped over single windows instead of batches, so the
        model was called once per window and the progress bar total did not
        match the number of batches.
-    2. ``torch.tensor(...)`` was called on tensors (which warns and copies)
-       and the batch was not moved to the model device, which broke ``mps``
-       and ``cuda`` runs.
+    2. ``torch.tensor(...)`` was called on tensors (which warns and copies).
     3. Stacked segments that were longer than the model segment length were
        not windowed (see ``AudioHandler.window_audio``).
     """
@@ -328,8 +326,11 @@ class TestGenerateEmbeddingsFromAudioArray:
         embeddings = embedder.generate_embeddings_from_audio_array(audio)
         assert embeddings == [float(i) for i in range(3)]
 
-    def test_batches_are_moved_to_the_model_device(self):
+    def test_batches_are_not_moved_to_the_model_device(self):
+        # models move their own input (see ModelBaseClass.__call__), so the
+        # runner must hand the audio over where it is
         embedder = self._embedder()
+        embedder.model.device = "meta"
         embedder.generate_embeddings_from_audio_array(self._long_recording())
         assert set(embedder.model.devices) == {"cpu"}
 

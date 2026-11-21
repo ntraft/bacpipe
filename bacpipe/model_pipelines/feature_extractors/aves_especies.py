@@ -84,6 +84,7 @@ class Model(ModelBaseClass, nn.Module):
         torch.Tensor
             concatenated mean-pooled embeddings
         """
+        input = input.to(self.device)
         embeds = []
         for batch in input.split(BATCH_SIZE):
             out_raw = self.model.extract_features(batch)[0]

@@ -72,6 +72,7 @@ class Model(ModelBaseClass):
         torch.Tensor
             model embeddings
         """
+        input = input.to(self.device)
         self.model.block_features = self.model.backbone.blocks(
             self.model.backbone.bn1(self.model.backbone.conv_stem(input))
         )

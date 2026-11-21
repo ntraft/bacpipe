@@ -184,10 +184,17 @@ class ModelBaseClass:
         without any modification. Model specific subclasses override this
         method.
 
+        Callers may pass the input on any device. Each model moves it to
+        where it computes. You are advised not to preemptively transfer
+        the input to any device it's not already on, because that may
+        cause unnecessary transfers. For instance, some models must
+        perform preprocessing on the CPU, so preemptorily transferring to
+        GPU will cause an extra round-trip.
+
         Parameters
         ----------
         input : torch.Tensor
-            input samples
+            input samples, on any device
 
         Returns
         -------

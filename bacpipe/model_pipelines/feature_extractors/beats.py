@@ -98,13 +98,17 @@ class Model(ModelBaseClass):
         Parameters
         ----------
         audio : torch.Tensor
-            audio samples to be preprocessed
+            audio samples to be preprocessed, on any device. They are moved
+            to the model device first, so the filterbanks are computed there.
 
         Returns
         -------
         torch.Tensor
             preprocessed audio
         """
+        # on the GPU the filterbanks are faster, and they leave the CPU cores
+        # to the data loading workers
+        audio = audio.to(self.device)
         return self.model.process_audio_beats(audio)
 
     def __call__(self, x):
@@ -121,4 +125,5 @@ class Model(ModelBaseClass):
         torch.Tensor
             BEATs embeddings
         """
+        x = x.to(self.device)
         return self.model.get_embeddings(x)
