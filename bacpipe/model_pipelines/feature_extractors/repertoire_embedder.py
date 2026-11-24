@@ -31,6 +31,7 @@ class Model(ModelBaseClass):
 
     @torch.inference_mode()
     def __call__(self, input):
+        input = input.to(self.device)
         x = self.frontend(input)
         embeddings = self.model[0](x)
         return embeddings
