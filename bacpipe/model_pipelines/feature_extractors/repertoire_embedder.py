@@ -27,6 +27,11 @@ class Model(ModelBaseClass):
         self.model.load_state_dict(state_dict)
 
     def preprocess(self, audio): # audio is a torch.tensor object
+        # Move the audio first, so the normalization runs on the model device.
+        # This may be faster, but it also appears to address a memory leak that
+        # was caused by making a copy of the whole batch on CPU. The same thing
+        # appears in the BEATs models.
+        audio = audio.to(self.device)
         return (audio - torch.mean(audio) ) / torch.std(audio)
 
     @torch.inference_mode()
